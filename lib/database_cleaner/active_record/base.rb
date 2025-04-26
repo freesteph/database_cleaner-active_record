@@ -78,15 +78,20 @@ module DatabaseCleaner
       def lookup_from_connection_pool
         return unless ::ActiveRecord::Base.respond_to?(:descendants)
 
-        database_name = connection_hash['database'] || connection_hash[:database]
+        database_host = connection_hash['host'] || connection_hash[:host]
+
         ::ActiveRecord::Base.descendants.select(&:connection_pool).detect do |model|
-          database_for(model) == database_name
+          database_host_for(model) == database_host
         end
       end
 
       def establish_connection
         ::ActiveRecord::Base.establish_connection(connection_hash)
         ::ActiveRecord::Base
+      end
+
+      def database_host_for(model)
+        model.connection_pool.db_config.configuration_hash[:host]
       end
 
       def database_for(model)
